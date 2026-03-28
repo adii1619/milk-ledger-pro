@@ -68,7 +68,7 @@ export default function CustomerCard({ customer, onUpdate }: Props) {
                   <div key={entry.id} className="flex items-center justify-between rounded bg-muted px-3 py-1.5 text-sm">
                     <span>{entry.date}</span>
                     <span>{entry.liters}L</span>
-                    <span className="font-medium">₹{entry.total}</span>
+                    <span className="font-medium">Rs.{entry.total}</span>
                   </div>
                 ))}
               </div>
