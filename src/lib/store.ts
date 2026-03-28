@@ -122,7 +122,7 @@ export function sendWhatsAppReceipt(bill: Bill) {
   bill.entries.forEach(e => {
     msg += `• ${e.date}: ${e.liters}L × ₹${e.ratePerLiter} = ₹${e.total}\n`;
   });
-  msg += `\n📊 *Total: ${bill.totalLiters}L = ₹${bill.totalAmount}*`;
+  msg += `\n📊 *Total: ${bill.totalLiters}L = Rs.${bill.totalAmount}*`;
   const phone = bill.customerPhone.replace(/[^0-9]/g, '');
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
