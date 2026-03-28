@@ -68,10 +68,10 @@ export default function AddCustomerDialog({ onAdded }: Props) {
           </div>
           <div>
             <Label htmlFor="phone">WhatsApp Number</Label>
-            <Input id="phone" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91XXXXXXXXXX" required />
+            <Input id="phone" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+92XXXXXXXXXX" required />
           </div>
           <div>
-            <Label htmlFor="rate">Rate per Liter (₹)</Label>
+            <Label htmlFor="rate">Rate per Liter (Rs.)</Label>
             <Input id="rate" type="number" step="0.5" value={rate} onChange={e => setRate(e.target.value)} placeholder="e.g. 60" required />
           </div>
           <Button type="submit" className="w-full">Add Customer</Button>
