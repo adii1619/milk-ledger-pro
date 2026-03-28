@@ -47,6 +47,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        village: {
+          DEFAULT: "hsl(var(--village))",
+          foreground: "hsl(var(--village-foreground))",
+        },
+        city: {
+          DEFAULT: "hsl(var(--city))",
+          foreground: "hsl(var(--city-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
