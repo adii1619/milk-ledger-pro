@@ -70,8 +70,8 @@ export default function AddEntryDialog({ customers, onAdded }: Props) {
           {selectedCustomer && liters && (
             <div className="rounded-lg bg-accent p-3 text-sm">
               <span className="text-muted-foreground">Total: </span>
-              <span className="font-bold text-accent-foreground">₹{(parseFloat(liters) * selectedCustomer.ratePerLiter).toFixed(2)}</span>
-              <span className="text-muted-foreground"> ({liters}L × ₹{selectedCustomer.ratePerLiter})</span>
+               <span className="font-bold text-accent-foreground">Rs.{(parseFloat(liters) * selectedCustomer.ratePerLiter).toFixed(2)}</span>
+               <span className="text-muted-foreground"> ({liters}L × Rs.{selectedCustomer.ratePerLiter})</span>
             </div>
           )}
           <Button type="submit" className="w-full">Save Entry</Button>

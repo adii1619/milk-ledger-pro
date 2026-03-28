@@ -120,7 +120,7 @@ export function sendWhatsAppReceipt(bill: Bill) {
   msg += `Period: ${bill.fromDate} to ${bill.toDate}\n\n`;
   msg += `📋 *Details:*\n`;
   bill.entries.forEach(e => {
-    msg += `• ${e.date}: ${e.liters}L × ₹${e.ratePerLiter} = ₹${e.total}\n`;
+    msg += `• ${e.date}: ${e.liters}L × Rs.${e.ratePerLiter} = Rs.${e.total}\n`;
   });
   msg += `\n📊 *Total: ${bill.totalLiters}L = Rs.${bill.totalAmount}*`;
   const phone = bill.customerPhone.replace(/[^0-9]/g, '');

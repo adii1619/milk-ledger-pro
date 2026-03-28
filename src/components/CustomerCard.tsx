@@ -74,7 +74,7 @@ export default function CustomerCard({ customer, onUpdate }: Props) {
               </div>
               <div className="flex items-center justify-between rounded-lg bg-accent px-3 py-2 text-sm font-semibold">
                 <span>Total: {totalLiters}L</span>
-                <span>₹{totalAmount.toFixed(2)}</span>
+                <span>Rs.{totalAmount.toFixed(2)}</span>
               </div>
             </>
           ) : (
