@@ -49,7 +49,7 @@ export default function CustomerCard({ customer, onUpdate }: Props) {
               {isVillage ? '🏡' : '🏙️'} {customer.name}
             </CardTitle>
             <p className="mt-1 text-xs text-muted-foreground">
-              {customer.phone} · ₹{customer.ratePerLiter}/L · {isVillage ? 'Supplier' : 'Buyer'}
+              {customer.phone} · Rs.{customer.ratePerLiter}/L · {isVillage ? 'Supplier' : 'Buyer'}
             </p>
           </div>
           {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
