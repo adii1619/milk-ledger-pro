@@ -3,11 +3,29 @@ import { Customer, getEntriesForCustomer, generateBill, sendWhatsAppReceipt, del
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Send, ChevronDown, ChevronUp } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Trash2, Send, ChevronDown, ChevronUp, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Props {
   customer: Customer;
   onUpdate: () => void;
+}
+
+const AUTO_RECEIPT_KEY = 'milkman_auto_receipt';
+
+function getAutoReceipt(customerId: string): boolean {
+  const data = localStorage.getItem(AUTO_RECEIPT_KEY);
+  const map = data ? JSON.parse(data) : {};
+  return !!map[customerId];
+}
+
+function setAutoReceipt(customerId: string, enabled: boolean) {
+  const data = localStorage.getItem(AUTO_RECEIPT_KEY);
+  const map = data ? JSON.parse(data) : {};
+  map[customerId] = enabled;
+  localStorage.setItem(AUTO_RECEIPT_KEY, JSON.stringify(map));
 }
 
 export default function CustomerCard({ customer, onUpdate }: Props) {
@@ -18,6 +36,8 @@ export default function CustomerCard({ customer, onUpdate }: Props) {
     return d.toISOString().split('T')[0];
   });
   const [toDate, setToDate] = useState(new Date().toISOString().split('T')[0]);
+  const [autoReceipt, setAutoReceiptState] = useState(() => getAutoReceipt(customer.id));
+  const { toast } = useToast();
 
   const entries = expanded ? getEntriesForCustomer(customer.id, fromDate, toDate) : [];
   const totalLiters = entries.reduce((s, e) => s + e.liters, 0);
@@ -33,6 +53,17 @@ export default function CustomerCard({ customer, onUpdate }: Props) {
       deleteCustomer(customer.id);
       onUpdate();
     }
+  };
+
+  const handleAutoReceiptToggle = (checked: boolean) => {
+    setAutoReceiptState(checked);
+    setAutoReceipt(customer.id, checked);
+    toast({
+      title: checked ? 'Auto Receipt Enabled' : 'Auto Receipt Disabled',
+      description: checked
+        ? `Monthly receipt will be sent to ${customer.name} at end of each month.`
+        : `Auto receipt turned off for ${customer.name}.`,
+    });
   };
 
   const isVillage = customer.type === 'village';
@@ -52,11 +83,30 @@ export default function CustomerCard({ customer, onUpdate }: Props) {
               {customer.phone} · Rs.{customer.ratePerLiter}/L · {isVillage ? 'Supplier' : 'Buyer'}
             </p>
           </div>
-          {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          <div className="flex items-center gap-2">
+            {autoReceipt && <Clock className="h-4 w-4 text-primary" title="Auto receipt enabled" />}
+            {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          </div>
         </div>
       </CardHeader>
       {expanded && (
         <CardContent className="space-y-3 pt-0">
+          {/* Auto receipt toggle */}
+          <div className="flex items-center justify-between rounded-lg border bg-muted/50 px-3 py-2">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
+              <Label htmlFor={`auto-${customer.id}`} className="text-xs font-medium cursor-pointer">
+                Auto-send monthly receipt
+              </Label>
+            </div>
+            <Switch
+              id={`auto-${customer.id}`}
+              checked={autoReceipt}
+              onCheckedChange={handleAutoReceiptToggle}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+
           <div className="flex gap-2">
             <Input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="text-xs" />
             <Input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="text-xs" />
