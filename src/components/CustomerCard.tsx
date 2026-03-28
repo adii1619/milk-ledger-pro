@@ -84,7 +84,7 @@ export default function CustomerCard({ customer, onUpdate }: Props) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {autoReceipt && <Clock className="h-4 w-4 text-primary" title="Auto receipt enabled" />}
+            {autoReceipt && <Clock className="h-4 w-4 text-primary" />}
             {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
           </div>
         </div>
