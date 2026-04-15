@@ -1,25 +1,22 @@
-import { useState, useCallback } from 'react';
-import { getCustomers, Customer } from '@/lib/store';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCustomers } from '@/hooks/useCustomers';
+import { useEntries } from '@/hooks/useEntries';
 import Dashboard from '@/components/Dashboard';
 import AddCustomerDialog from '@/components/AddCustomerDialog';
 import AddEntryDialog from '@/components/AddEntryDialog';
 import CustomerCard from '@/components/CustomerCard';
 import { Button } from '@/components/ui/button';
-import { Milk, LogOut } from 'lucide-react';
+import { Milk, LogOut, Brain } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 type Tab = 'all' | 'village' | 'city';
 
 export default function Index() {
-  const [customers, setCustomers] = useState<Customer[]>(getCustomers);
   const [tab, setTab] = useState<Tab>('all');
-  const [, setTick] = useState(0);
   const { signOut } = useAuth();
-
-  const refresh = useCallback(() => {
-    setCustomers(getCustomers());
-    setTick(t => t + 1);
-  }, []);
+  const { customers, isLoading, addCustomer, deleteCustomer, toggleAutoReceipt } = useCustomers();
+  const { entries, addEntry } = useEntries();
 
   const filtered = tab === 'all' ? customers : customers.filter(c => c.type === tab);
 
@@ -37,8 +34,13 @@ export default function Index() {
             </div>
           </div>
           <div className="flex gap-2">
-            <AddEntryDialog customers={customers} onAdded={refresh} />
-            <AddCustomerDialog onAdded={refresh} />
+            <Link to="/analytics">
+              <Button variant="outline" size="icon" className="text-primary">
+                <Brain className="h-4 w-4" />
+              </Button>
+            </Link>
+            <AddEntryDialog customers={customers} onAdded={addEntry} />
+            <AddCustomerDialog onAdded={addCustomer} />
             <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-destructive">
               <LogOut className="h-4 w-4" />
             </Button>
@@ -47,7 +49,7 @@ export default function Index() {
       </header>
 
       <main className="mx-auto max-w-3xl space-y-5 px-4 py-5">
-        <Dashboard />
+        <Dashboard customers={customers} entries={entries} />
 
         <div className="flex gap-1 rounded-lg bg-muted p-1">
           {(['all', 'village', 'city'] as Tab[]).map(t => (
@@ -65,10 +67,17 @@ export default function Index() {
           ))}
         </div>
 
-        {filtered.length > 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center py-16 text-muted-foreground">Loading...</div>
+        ) : filtered.length > 0 ? (
           <div className="space-y-3">
             {filtered.map(c => (
-              <CustomerCard key={c.id} customer={c} onUpdate={refresh} />
+              <CustomerCard
+                key={c.id}
+                customer={c}
+                onDelete={() => deleteCustomer(c.id)}
+                onToggleAutoReceipt={(enabled) => toggleAutoReceipt({ id: c.id, enabled })}
+              />
             ))}
           </div>
         ) : (
