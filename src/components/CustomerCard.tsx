@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Customer, getEntriesForCustomer, generateBill, sendWhatsAppReceipt, deleteCustomer, MilkEntry } from '@/lib/store';
+import { Customer, getEntriesForCustomer, generateBill, sendWhatsAppReceipt, MilkEntry } from '@/lib/store';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,54 +11,61 @@ import { useToast } from '@/hooks/use-toast';
 
 interface Props {
   customer: Customer;
-  onUpdate: () => void;
+  onDelete: () => void;
+  onToggleAutoReceipt: (enabled: boolean) => void;
 }
 
-const AUTO_RECEIPT_KEY = 'milkman_auto_receipt';
-
-function getAutoReceipt(customerId: string): boolean {
-  const data = localStorage.getItem(AUTO_RECEIPT_KEY);
-  const map = data ? JSON.parse(data) : {};
-  return !!map[customerId];
-}
-
-function setAutoReceipt(customerId: string, enabled: boolean) {
-  const data = localStorage.getItem(AUTO_RECEIPT_KEY);
-  const map = data ? JSON.parse(data) : {};
-  map[customerId] = enabled;
-  localStorage.setItem(AUTO_RECEIPT_KEY, JSON.stringify(map));
-}
-
-export default function CustomerCard({ customer, onUpdate }: Props) {
+export default function CustomerCard({ customer, onDelete, onToggleAutoReceipt }: Props) {
+  const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
+  const [entries, setEntries] = useState<MilkEntry[]>([]);
   const [fromDate, setFromDate] = useState(() => {
-    const d = new Date();
-    d.setDate(1);
+    const d = new Date(); d.setDate(1);
     return d.toISOString().split('T')[0];
   });
   const [toDate, setToDate] = useState(new Date().toISOString().split('T')[0]);
-  const [autoReceipt, setAutoReceiptState] = useState(() => getAutoReceipt(customer.id));
   const { toast } = useToast();
 
-  const entries = expanded ? getEntriesForCustomer(customer.id, fromDate, toDate) : [];
+  const loadEntries = async () => {
+    if (!user) return;
+    const data = await getEntriesForCustomer(user.id, customer.id, fromDate, toDate);
+    setEntries(data);
+  };
+
+  const handleExpand = async () => {
+    const next = !expanded;
+    setExpanded(next);
+    if (next) await loadEntries();
+  };
+
+  const handleDateChange = async (setter: (v: string) => void, value: string) => {
+    setter(value);
+    if (expanded && user) {
+      // Will reload on next render via effect
+      setTimeout(async () => {
+        const from = setter === setFromDate ? value : fromDate;
+        const to = setter === setToDate ? value : toDate;
+        const data = await getEntriesForCustomer(user.id, customer.id, from, to);
+        setEntries(data);
+      }, 0);
+    }
+  };
+
   const totalLiters = entries.reduce((s, e) => s + e.liters, 0);
   const totalAmount = entries.reduce((s, e) => s + e.total, 0);
 
-  const handleSendReceipt = () => {
-    const bill = generateBill(customer.id, fromDate, toDate);
+  const handleSendReceipt = async () => {
+    if (!user) return;
+    const bill = await generateBill(user.id, customer.id, fromDate, toDate);
     if (bill && bill.entries.length > 0) sendWhatsAppReceipt(bill);
   };
 
   const handleDelete = () => {
-    if (confirm(`Delete ${customer.name} and all their entries?`)) {
-      deleteCustomer(customer.id);
-      onUpdate();
-    }
+    if (confirm(`Delete ${customer.name} and all their entries?`)) onDelete();
   };
 
   const handleAutoReceiptToggle = (checked: boolean) => {
-    setAutoReceiptState(checked);
-    setAutoReceipt(customer.id, checked);
+    onToggleAutoReceipt(checked);
     toast({
       title: checked ? 'Auto Receipt Enabled' : 'Auto Receipt Disabled',
       description: checked
@@ -72,7 +80,7 @@ export default function CustomerCard({ customer, onUpdate }: Props) {
     <Card className="overflow-hidden transition-shadow hover:shadow-md">
       <CardHeader
         className={`cursor-pointer pb-3 ${isVillage ? 'border-l-4 border-l-village' : 'border-l-4 border-l-city'}`}
-        onClick={() => setExpanded(!expanded)}
+        onClick={handleExpand}
       >
         <div className="flex items-center justify-between">
           <div>
@@ -84,14 +92,13 @@ export default function CustomerCard({ customer, onUpdate }: Props) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {autoReceipt && <Clock className="h-4 w-4 text-primary" />}
+            {customer.autoMonthlyReceipt && <Clock className="h-4 w-4 text-primary" />}
             {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
           </div>
         </div>
       </CardHeader>
       {expanded && (
         <CardContent className="space-y-3 pt-0">
-          {/* Auto receipt toggle */}
           <div className="flex items-center justify-between rounded-lg border bg-muted/50 px-3 py-2">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />
@@ -101,15 +108,15 @@ export default function CustomerCard({ customer, onUpdate }: Props) {
             </div>
             <Switch
               id={`auto-${customer.id}`}
-              checked={autoReceipt}
+              checked={customer.autoMonthlyReceipt}
               onCheckedChange={handleAutoReceiptToggle}
               onClick={(e) => e.stopPropagation()}
             />
           </div>
 
           <div className="flex gap-2">
-            <Input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="text-xs" />
-            <Input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="text-xs" />
+            <Input type="date" value={fromDate} onChange={e => handleDateChange(setFromDate, e.target.value)} className="text-xs" />
+            <Input type="date" value={toDate} onChange={e => handleDateChange(setToDate, e.target.value)} className="text-xs" />
           </div>
           {entries.length > 0 ? (
             <>

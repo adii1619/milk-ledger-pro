@@ -1,9 +1,12 @@
-import { getCustomers, getEntries } from '@/lib/store';
+import { Customer, MilkEntry } from '@/lib/store';
 import { Milk, Users, TrendingUp, TrendingDown } from 'lucide-react';
 
-export default function Dashboard() {
-  const customers = getCustomers();
-  const entries = getEntries();
+interface Props {
+  customers: Customer[];
+  entries: MilkEntry[];
+}
+
+export default function Dashboard({ customers, entries }: Props) {
   const today = new Date().toISOString().split('T')[0];
   const todayEntries = entries.filter(e => e.date === today);
 

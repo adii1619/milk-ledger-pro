@@ -14,7 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          auto_monthly_receipt: boolean
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          rate_per_liter: number
+          type: Database["public"]["Enums"]["customer_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_monthly_receipt?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string
+          rate_per_liter?: number
+          type: Database["public"]["Enums"]["customer_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_monthly_receipt?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          rate_per_liter?: number
+          type?: Database["public"]["Enums"]["customer_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      milk_entries: {
+        Row: {
+          created_at: string
+          customer_id: string
+          date: string
+          id: string
+          liters: number
+          rate_per_liter: number
+          total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          date?: string
+          id?: string
+          liters?: number
+          rate_per_liter?: number
+          total?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          date?: string
+          id?: string
+          liters?: number
+          rate_per_liter?: number
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milk_entries_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +99,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      customer_type: "village" | "city"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +226,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      customer_type: ["village", "city"],
+    },
   },
 } as const
