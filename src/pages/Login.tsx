@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Milk } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -20,12 +21,32 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     const { error } = await signIn(email, password);
-    setLoading(false);
     if (error) {
+      setLoading(false);
       toast({ title: 'Login failed', description: error.message, variant: 'destructive' });
-    } else {
-      navigate('/dashboard');
+      return;
     }
+
+    // Check if there's a pending role from signup
+    const pendingRole = localStorage.getItem('pending_role');
+    if (pendingRole) {
+      localStorage.removeItem('pending_role');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Check if role already exists
+        const { data: existing } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (!existing) {
+          await supabase.from('user_roles').insert({ user_id: user.id, role: pendingRole });
+        }
+      }
+    }
+
+    setLoading(false);
+    navigate('/dashboard');
   };
 
   return (
