@@ -40,7 +40,7 @@ export default function Login() {
           .eq('user_id', user.id)
           .maybeSingle();
         if (!existing) {
-          await supabase.from('user_roles').insert({ user_id: user.id, role: pendingRole });
+          await supabase.from('user_roles').insert({ user_id: user.id, role: pendingRole as 'user' | 'milkman' | 'dairy_shop_owner' });
         }
       }
     }
