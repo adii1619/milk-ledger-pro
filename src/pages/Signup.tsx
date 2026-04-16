@@ -99,10 +99,15 @@ export default function Signup() {
               {loading ? 'Creating account...' : 'Sign Up'}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link to="/login" className="font-medium text-primary hover:underline">Login</Link>
-          </p>
+          <div className="mt-4 space-y-1 text-center text-sm text-muted-foreground">
+            <p>
+              Already have an account?{' '}
+              <Link to="/login" className="font-medium text-primary hover:underline">Login</Link>
+            </p>
+            <p>
+              <Link to="/" className="font-medium text-primary hover:underline">← Back to Home</Link>
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
