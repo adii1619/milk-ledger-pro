@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { Tables } from '@/integrations/supabase/types';
 
 export type CustomerType = 'village' | 'city';
 
@@ -161,7 +162,7 @@ export function sendWhatsAppReceipt(bill: Bill) {
 
 // ── Mappers ──
 
-function mapCustomer(row: any): Customer {
+function mapCustomer(row: Tables<'customers'>): Customer {
   return {
     id: row.id,
     name: row.name,
@@ -173,7 +174,7 @@ function mapCustomer(row: any): Customer {
   };
 }
 
-function mapEntry(row: any): MilkEntry {
+function mapEntry(row: Tables<'milk_entries'>): MilkEntry {
   return {
     id: row.id,
     customerId: row.customer_id,

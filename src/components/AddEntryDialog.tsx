@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 interface Props {
   customers: Customer[];
-  onAdded: (entry: Omit<MilkEntry, 'id' | 'total'>) => Promise<any>;
+  onAdded: (entry: Omit<MilkEntry, 'id' | 'total'>) => Promise<unknown>;
 }
 
 export default function AddEntryDialog({ customers, onAdded }: Props) {

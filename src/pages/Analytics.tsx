@@ -60,8 +60,8 @@ export default function Analytics() {
       } else {
         setPredictions(data.predictions);
       }
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message || 'Failed to get predictions', variant: 'destructive' });
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Failed to get predictions', variant: 'destructive' });
     } finally {
       setLoading(false);
     }

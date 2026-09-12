@@ -7,7 +7,7 @@ import { CustomerType } from '@/lib/store';
 import { UserPlus } from 'lucide-react';
 
 interface Props {
-  onAdded: (customer: { name: string; phone: string; type: CustomerType; ratePerLiter: number }) => Promise<any>;
+  onAdded: (customer: { name: string; phone: string; type: CustomerType; ratePerLiter: number }) => Promise<unknown>;
 }
 
 export default function AddCustomerDialog({ onAdded }: Props) {

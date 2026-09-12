@@ -6,6 +6,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+interface CustomerRow {
+  id: string;
+  type: "village" | "city";
+}
+
+interface MilkEntryRow {
+  customer_id: string;
+  date: string;
+  liters: number;
+  total: number;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -32,8 +44,8 @@ serve(async (req) => {
       supabase.from("milk_entries").select("*").eq("user_id", user.id).order("date", { ascending: true }),
     ]);
 
-    const customers = customersRes.data || [];
-    const entries = entriesRes.data || [];
+    const customers = (customersRes.data || []) as CustomerRow[];
+    const entries = (entriesRes.data || []) as MilkEntryRow[];
 
     if (entries.length < 3) {
       return new Response(JSON.stringify({
@@ -43,14 +55,14 @@ serve(async (req) => {
     }
 
     // Prepare data summary for AI
-    const villageCustomers = customers.filter((c: any) => c.type === "village");
-    const cityCustomers = customers.filter((c: any) => c.type === "city");
+    const villageCustomers = customers.filter((customer) => customer.type === "village");
+    const cityCustomers = customers.filter((customer) => customer.type === "city");
 
     const dailyData: Record<string, { bought: number; sold: number }> = {};
     for (const e of entries) {
       const date = e.date;
       if (!dailyData[date]) dailyData[date] = { bought: 0, sold: 0 };
-      const cust = customers.find((c: any) => c.id === e.customer_id);
+      const cust = customers.find((customer) => customer.id === e.customer_id);
       if (cust?.type === "village") dailyData[date].bought += Number(e.liters);
       else dailyData[date].sold += Number(e.liters);
     }
@@ -63,7 +75,7 @@ serve(async (req) => {
     for (const e of entries) {
       const month = e.date.substring(0, 7);
       if (!monthlyTotals[month]) monthlyTotals[month] = { bought: 0, sold: 0, revenue: 0, cost: 0 };
-      const cust = customers.find((c: any) => c.id === e.customer_id);
+      const cust = customers.find((customer) => customer.id === e.customer_id);
       if (cust?.type === "village") {
         monthlyTotals[month].bought += Number(e.liters);
         monthlyTotals[month].cost += Number(e.total);
